@@ -6,7 +6,11 @@
 #include <FS.h>
 #include <WebSocketsServer.h>
 #include  "FastLED.h"
+
+
 #define NUM_LEDS 59
+#define DATA_PIN 14 //D5 on board
+
 void rainbowWave(uint8_t, uint8_t);
 
 
@@ -19,7 +23,7 @@ WebSocketsServer webSocket(81);    // create a websocket server on port 81
 
 File fsUploadFile;                 // a File variable to temporarily store the received file
 
-const char *ssid = "Twoja stara"; // The name of the Wi-Fi network that will be created
+const char *ssid = "NodeMCU1"; // The name of the Wi-Fi network that will be created
 const char *password = "";   // The password required to connect to it, leave blank for an open network
 
 const char *OTAName = "ESP8266";           // A name and a password for the OTA service
@@ -30,7 +34,7 @@ const char *OTAPassword = "esp8266";
 const char* mdnsName = "esp8266"; // Domain name for the mDNS responder
 
 void setup() {
-  FastLED.addLeds<WS2813, 5, GRB>(leds, NUM_LEDS); 
+  FastLED.addLeds<WS2813, DATA_PIN, GRB>(leds, NUM_LEDS); 
 
   Serial.begin(115200);        // Start the Serial communication to send messages to the computer
   delay(10);
@@ -86,8 +90,8 @@ void startWiFi() { // Start a Wi-Fi access point, and try to connect to some giv
   Serial.println("\" started\r\n");
 
   wifiMulti.addAP("Orange_Swiatlowod_E8A0", "mlekogrzybowe");   // add Wi-Fi networks you want to connect to
-  wifiMulti.addAP("ssid_from_AP_2", "your_password_for_AP_2");
-  wifiMulti.addAP("ssid_from_AP_3", "your_password_for_AP_3");
+  // wifiMulti.addAP("ssid_from_AP_2", "your_password_for_AP_2");
+  // wifiMulti.addAP("ssid_from_AP_3", "your_password_for_AP_3");
 
   Serial.println("Connecting");
   while (wifiMulti.run() != WL_CONNECTED && WiFi.softAPgetStationNum() < 1) {  // Wait for the Wi-Fi to connect
