@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>LED Control</title>
+    <title>Zarzadzanie tasma LED</title>
     <link href='main.css' rel='stylesheet' type='text/css'>
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png">
     <link rel="icon" type="image/png" sizes="144x144"  href="/favicon-144x144.png">
     <link rel="icon" type="image/png" sizes="48x48" href="/favicon.ico">
     <link rel="manifest" href="/manifest.json">
@@ -15,25 +14,38 @@
 <body>
     <center>
         <header>
-            <h1>Select color</h1>
+            <h1>Wybierz tryb</h1> <!-- ver 2 -->
         </header>
-        <div>
             <table>
                 <tr>
-                    <td style="width:14.4px; text-align: right">R: </td>
-                    <td><input class="enabled" id="r" type="range" min="0" max="1023" step="1" oninput="sendRGB();" value="0"></td>
+                    <td>Tryb:</td>
+                    <td><select name="mode" id="mode" oninput="switchMode();">
+                        <option value="adalight">Adalight (odczyt przez serial)</option>
+                        <option value="solid">Jednolity kolor</option>
+                        <option value="effects">Efekty specjalne</option>
+                      </select>
+                    </td>
                 </tr>
-                <tr>
-                    <td style="width:14.4px; text-align: right">G: </td>
-                    <td><input class="enabled" id="g" type="range" min="0" max="1023" step="1" oninput="sendRGB();" value="0"></td>
+                <tr style="display: none;" id="settingsAdalight">
+                    <td>TUTAJ USTAWIENNIA PRZY settingsAdalight</td>
                 </tr>
-                <tr>
-                    <td style="width:14.4px; text-align: right">B: </td>
-                    <td><input class="enabled" id="b" type="range" min="0" max="1023" step="1" oninput="sendRGB();" value="0"></td>
+                <tr style="display: none;" id="settingsSolidColor">
+                    <td>Kolor: <input type="color" id="solidColor"></td>
                 </tr>
+                <tr style="display: none;" id="settingsEffects">
+                    <td>
+                        <p style="margin:8px 0px"><button id="rainbow" class="button" style="background-color:#999" onclick="rainbowEffect();">Rainbow</button></p>
+                    </td>
+                </tr>
+
             </table>
-            <p style="margin:8px 0px"><button id="rainbow" class="button" style="background-color:#999" onclick="rainbowEffect();">Rainbow</button></p>
-        </div>
+
     </center>
 </body>
+<script>
+    // ADD EVENT LISTENERS
+
+    // solid color
+    document.getElementById('solidColor').addEventListener("input", sendRGB);
+</script>
 </html>

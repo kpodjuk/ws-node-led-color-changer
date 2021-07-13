@@ -194,7 +194,7 @@ bool handleFileRead(String path) { // send the right file to the client (if it e
     File file = SPIFFS.open(path, "r");                    // Open the file
     size_t sent = server.streamFile(file, contentType);    // Send it to the client
     file.close();                                          // Close the file again
-    Serial.println(String("\tSent file: ") + path);
+    Serial.println(String("\tSent file-> ") + path);
     return true;
   }
   Serial.println(String("\tFile Not Found: ") + path);   // If the file doesn't exist, return false
@@ -242,29 +242,29 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
       }
       break;
     case WStype_TEXT:                     // if new text data is received
-      // Serial.printf("[%u] get Text: %s\n", num, payload);
+      Serial.printf("[%u] get Text: %s\n", num, payload);
       if (payload[0] == '#') {            // we get RGB data
+      // TODO: make the color transition smoooth
+
         uint32_t rgb = (uint32_t) strtol((const char *) &payload[1], NULL, 16);   // decode rgb data
         int r = ((rgb >> 20) & 0x3FF);                     // 10 bits per color, so R: bits 20-29
         int g = ((rgb >> 10) & 0x3FF);                     // G: bits 10-19
         int b =          rgb & 0x3FF;                      // B: bits  0-9
 
-        r = r/4;
-        g = g/4;
-        b = b/4;
-
         for(int i = 0; i<NUM_LEDS; i++){
-        leds[i].red = (uint8_t)r;                          // write it to the LED output pins
-        leds[i].green = (uint8_t)g;
-        leds[i].blue = (uint8_t)b;
+        leds[i].r = r;                          // write it to the LED output pins
+        leds[i].g = g;                          
+        leds[i].b = b;                          
         }
-        Serial.print("R:");
-        Serial.print(r);
-        Serial.print(" G:");
-        Serial.print(g);
-        Serial.print(" B:");
-        Serial.print(b);
-        Serial.print("\n");
+
+        // Serial.print("R:");
+        // Serial.print(r);
+        // Serial.print(" G:");
+        // Serial.print(g);
+        // Serial.print(" B:");
+        // Serial.print(b);
+        // Serial.print("\n");
+
       } else if (payload[0] == 'R') {                      // the browser sends an R when the rainbow effect is enabled
         rainbow = true;
         Serial.print("Rainbow started!");

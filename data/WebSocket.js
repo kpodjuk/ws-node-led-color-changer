@@ -1,3 +1,7 @@
+
+
+
+
 var rainbowEnable = false;
 var connection = new WebSocket('ws://'+location.hostname+':81/', ['arduino']);
 connection.onopen = function () {
@@ -14,10 +18,22 @@ connection.onclose = function(){
 };
 
 function sendRGB() {
-    var r = document.getElementById('r').value**2/1023;
-    var g = document.getElementById('g').value**2/1023;
-    var b = document.getElementById('b').value**2/1023;
-    
+    var color = document.getElementById('solidColor').value;
+
+
+    color = color.slice(1,7); //get rid of '#' at beggining
+
+    var colorNumber = parseInt(color, 16);
+
+
+    var r = (colorNumber & 0xFF0000) >> 16;
+    var g = (colorNumber & 0x00FF00) >> 8; 
+    var b = (colorNumber & 0x0000FF);
+
+    // console.log("R:"+r+"G:"+g+"B:"+b);
+
+
+    // weird format accepted by C code
     var rgb = r << 20 | g << 10 | b;
     var rgbstr = '#'+ rgb.toString(16);    
     console.log('RGB: ' + rgbstr); 
@@ -47,3 +63,31 @@ function rainbowEffect(){
         sendRGB();
     }  
 }
+
+
+function switchMode(){
+    var value = document.getElementById("mode").value;
+
+    switch(value){
+        case "adalight":
+            document.getElementById("settingsAdalight").style.display = "inline";
+            document.getElementById("settingsSolidColor").style.display = "none";
+            document.getElementById("settingsEffects").style.display = "none";
+            break;
+        case "solid":
+            document.getElementById("settingsAdalight").style.display = "none";
+            document.getElementById("settingsSolidColor").style.display = "inline";
+            document.getElementById("settingsEffects").style.display = "none";
+            break;
+        case "effects":
+            document.getElementById("settingsAdalight").style.display = "none";
+            document.getElementById("settingsSolidColor").style.display = "none";
+            document.getElementById("settingsEffects").style.display = "inline";
+            break;
+    }
+
+
+}
+
+
+
