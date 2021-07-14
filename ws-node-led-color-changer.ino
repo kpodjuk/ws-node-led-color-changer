@@ -14,6 +14,18 @@
 void rainbowWave(uint8_t, uint8_t);
 
 
+// Global vars to pass values from json message
+uint32_t solidColor = 0x0000FF; // default: blue
+
+enum OPERATING_MODE {
+  SOLID_COLOR,
+  RAINBOW,
+  DIFFERENT_EFFECTS,
+  AMBILIGHT
+} currentOperatingMode;
+
+
+
 CRGB leds[NUM_LEDS];
 
 ESP8266WiFiMulti wifiMulti;       // Create an instance of the ESP8266WiFiMulti class, called 'wifiMulti'
@@ -22,6 +34,8 @@ ESP8266WebServer server(80);       // Create a webserver object that listens for
 WebSocketsServer webSocket(81);    // create a websocket server on port 81
 
 File fsUploadFile;                 // a File variable to temporarily store the received file
+
+StaticJsonDocument<200> jsonDoc;    // JSON document received with websocket
 
 const char *ssid = "NodeMCU1"; // The name of the Wi-Fi network that will be created
 const char *password = "";   // The password required to connect to it, leave blank for an open network
@@ -32,6 +46,9 @@ const char *OTAPassword = "esp8266";
 
 
 const char* mdnsName = "esp8266"; // Domain name for the mDNS responder
+
+
+
 
 void setup() {
   FastLED.addLeds<WS2813, DATA_PIN, GRB>(leds, NUM_LEDS); 
@@ -65,18 +82,10 @@ void loop() {
   server.handleClient();                      // run the server
   ArduinoOTA.handle();                        // listen for OTA events
 
+  // checkOperationMode(); // check if need to apply effects etc
 
 
-  if(rainbow) {                               // if the rainbow effect is turned on
-    // if(millis() > prevMillis + 32) {          
-    //   if(++hue == 360)                        // Cycle through the color wheel (increment by one degree every 32 ms)
-    //     hue = 0;
-    //   setHue(hue);                            // Set the RGB LED to the right color
-    //   prevMillis = millis();
-    // }
-      rainbowWave(200, 10);
-      FastLED.show();
-  }
+
 
   }
 
@@ -89,7 +98,7 @@ void startWiFi() { // Start a Wi-Fi access point, and try to connect to some giv
   Serial.print(ssid);
   Serial.println("\" started\r\n");
 
-  wifiMulti.addAP("Orange_Swiatlowod_E8A0", "mlekogrzybowe");   // add Wi-Fi networks you want to connect to
+  wifiMulti.addAP("Orange_Swiatlowod_Gora", "mlekogrzybowe");   // add Wi-Fi networks you want to connect to
   // wifiMulti.addAP("ssid_from_AP_2", "your_password_for_AP_2");
   // wifiMulti.addAP("ssid_from_AP_3", "your_password_for_AP_3");
 
@@ -243,41 +252,45 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
       break;
     case WStype_TEXT:                     // if new text data is received
       Serial.printf("[%u] get Text: %s\n", num, payload);
-      if (payload[0] == '#') {            // we get RGB data
-      // TODO: make the color transition smoooth
-
-        uint32_t rgb = (uint32_t) strtol((const char *) &payload[1], NULL, 16);   // decode rgb data
-        int r = ((rgb >> 20) & 0x3FF);                     // 10 bits per color, so R: bits 20-29
-        int g = ((rgb >> 10) & 0x3FF);                     // G: bits 10-19
-        int b =          rgb & 0x3FF;                      // B: bits  0-9
-
-        r = r/4;
-        g = g/4;
-        b = b/4;
 
 
-        for(int i = 0; i<NUM_LEDS; i++){
-        leds[i].r = r;                          // write it to the LED output pins
-        leds[i].g = g;                          
-        leds[i].b = b;                          
-        }
+      // process received JSON
 
-        // Serial.print("R:");
-        // Serial.print(r);
-        // Serial.print(" G:");
-        // Serial.print(g);
-        // Serial.print(" B:");
-        // Serial.print(b);
-        // Serial.print("\n");
+      DeserializationError error = deserializeJson(jsonDoc, payload);
 
-      } else if (payload[0] == 'R') {                      // the browser sends an R when the rainbow effect is enabled
-        rainbow = true;
-        Serial.print("Rainbow started!");
-      } else if (payload[0] == 'N') {                      // the browser sends an N when the rainbow effect is disabled
-        Serial.print("Rainbow stopped!");
-        rainbow = false;
+      // Test if parsing succeeds.
+      if (error) {
+        Serial.print(F("deserializeJson() failed: "));
+        Serial.println(error.f_str());
+        return;  
       }
-      FastLED.show();
+
+
+      // Fetch values.
+      //
+      // Most of the time, you can rely on the implicit casts.
+      // In other case, you can do doc["time"].as<long>();
+
+
+      // Serial.printf("%s and %s", String(jsonDoc["type"]), (jsonDoc["value"]));
+
+      if(jsonDoc["type"] == "SOLID_COLOR"){ // SOLID _COLOR
+
+        currentOperatingMode = SOLID_COLOR;
+        solidColor = jsonDoc["value"];
+
+        // Serial.print("Received solidColor type message\n");
+        
+
+        // setSolidColor((int)jsonDoc["value"]);
+      }
+
+      // After receiving message -> check what to do 
+      checkOperationMode();
+
+
+
+
       break;
   }
 }
@@ -336,7 +349,7 @@ void setHue(int hue) { // Set the RGB LED to a given hue (color) (0° = Red, 120
         leds[i].green = (uint8_t)g;
         leds[i].blue = (uint8_t)b;
         }
-      FastLED.show();
+
 
 }
 void rainbowWave(uint8_t thisSpeed, uint8_t deltaHue) {     // The fill_rainbow call doesn't support brightness levels.
@@ -349,4 +362,52 @@ void rainbowWave(uint8_t thisSpeed, uint8_t deltaHue) {     // The fill_rainbow 
 } 
 
 
+void checkOperationMode(void){
+  if(currentOperatingMode == SOLID_COLOR){ // set whole strip to one color
+    // set color here, solidColor global var contains color info
+        
+        for(int i = 0; i<NUM_LEDS; i++){
+        leds[i] = solidColor;                          // write it to the LED output pins                    
+        }
+        FastLED.show();
 
+
+  }
+
+  //rainbow
+  if(0) {                               // if the rainbow effect is turned on
+    // if(millis() > prevMillis + 32) {          
+    //   if(++hue == 360)                        // Cycle through the color wheel (increment by one degree every 32 ms)
+    //     hue = 0;
+    //   setHue(hue);                            // Set the RGB LED to the right color
+    //   prevMillis = millis();
+    // }
+      rainbowWave(200, 10);
+      FastLED.show();
+  }
+}
+
+
+void setSolidColor(int color){
+        
+
+          //  uint32_t rgb = (uint32_t) strtol((const char *) &payload[1], NULL, 16);   // decode rgb data
+        // int r = ((rgb >> 20) & 0x3FF);                     // 10 bits per color, so R: bits 20-29
+        // int g = ((rgb >> 10) & 0x3FF);                     // G: bits 10-19
+        // int b =          rgb & 0x3FF;                      // B: bits  0-9
+
+        // r = r/4;
+        // g = g/4;
+        // b = b/4;
+
+
+        // for(int i = 0; i<NUM_LEDS; i++){
+        // leds[i].r = r;                          // write it to the LED output pins
+        // leds[i].g = g;                          
+        // leds[i].b = b;                          
+        // }
+
+        // FastLED.show();
+
+
+}

@@ -1,13 +1,5 @@
-// message object
-var message = 
-{
-    type: "solid",
-    value: "#FFFFFF"
-}
 
-messageJson = JSON.stringify(message);
-
-var connectionCheckInterval = window.setInterval(function(){
+var connectionCheckInterval = window.setInterval(function(){ 
     checkConnection();
   }, 2000);
 
@@ -21,14 +13,25 @@ connection.onopen = function () {
 };
 connection.onerror = function (error) {
     console.log('WebSocket Error ', error);
-    checkConnection();
 };
 connection.onmessage = function (e) {  
     console.log('Server: ', e.data);
 };
 connection.onclose = function(){
+    checkConnection();
     console.log('WebSocket connection closed');
 };
+
+
+function sendJSON(message){
+    // input : message object
+
+
+
+    messageString = JSON.stringify(message);
+    connection.send(messageString);
+}
+
 
 function checkConnection(){
     // 0	CONNECTING	Socket has been created. The connection is not yet open.
@@ -58,40 +61,55 @@ function checkConnection(){
 }
 
 
-function sendRGB() {
+function sendSolidColor() {
     var color = document.getElementById('solidColor').value;
 
-
     color = color.slice(1,7); //get rid of '#' at beggining
-
     var colorNumber = parseInt(color, 16);
 
+    var message = 
+    {
+        type: "SOLID_COLOR",
+        value: colorNumber
+    }
+    sendJSON(message);
 
-    var r = (colorNumber & 0xFF0000) >> 16;
-    var g = (colorNumber & 0x00FF00) >> 8; 
-    var b = (colorNumber & 0x0000FF);
+    // var r = (colorNumber & 0xFF0000) >> 16;
+    // var g = (colorNumber & 0x00FF00) >> 8; 
+    // var b = (colorNumber & 0x0000FF);
 
     // console.log("R:"+r+"G:"+g+"B:"+b);
 
 
-    // weird format accepted by C code
-    var rgb = r << 20 | g << 10 | b;
-    var rgbstr = '#'+ rgb.toString(16);    
-    console.log('RGB: ' + rgbstr); 
-    connection.send(rgbstr);
+    // // weird format accepted by C code
+    // var rgb = r << 20 | g << 10 | b;
+    // var rgbstr = '#'+ rgb.toString(16);    
+    // console.log('RGB: ' + rgbstr); 
+    // connection.send(rgbstr);
+
+
 }
 
 function rainbowEffect(){
     rainbowEnable = ! rainbowEnable;
+
+
+    var message = 
+    {
+        type: "effect",
+        value: "rainbow"
+    }
+
     if(rainbowEnable){
         connection.send("R");
+        // sendJSON(message);
         document.getElementById('rainbow').style.backgroundColor = '#00878F';
 
     } else {
         connection.send("N");
         document.getElementById('rainbow').style.backgroundColor = '#999';
 
-        sendRGB();
+        // sendRGB();
     }  
 }
 
