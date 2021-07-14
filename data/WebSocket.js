@@ -13,21 +13,43 @@ connection.onopen = function () {
 connection.onerror = function (error) {
     console.log('WebSocket Error ', error);
 };
-connection.onmessage = function (e) {  
-    console.log('Server: ', e.data);
-};
+connection.onmessage = function (e) {
+    console.log("Message received:"+e.data);
+    processWebsocketMessage(e.data);
+}
 connection.onclose = function(){
     checkConnection();
     console.log('WebSocket connection closed');
 };
 
-
 function sendJSON(message){
     // input : message object
-
     messageString = JSON.stringify(message);
     connection.send(messageString);
 }
+
+function processWebsocketMessage(message){
+    m = JSON.parse(message);
+
+    if(m["type"] == "STATUS_UPDATE"){ // status update received
+        processStatusReport(m);
+    }
+
+}
+
+
+
+function requestStatusReport(){
+    var message = {
+        type: "STATUS_UPDATE_NEEDED"
+    }
+    sendJSON(message);
+}
+
+function processStatusReport(statusReport){ // process status sent from arduino and setup UI to reflect it
+    // statusReport - object with info
+}
+
 
 
 function checkConnection(){
@@ -75,12 +97,6 @@ function sendRainbowEffect(){
     {
         type: "RAINBOW",
         value: "rainbow"
-    }
-
-    if(rainbowEnable){
-        document.getElementById('rainbow').style.backgroundColor = '#00878F';
-    } else {
-        document.getElementById('rainbow').style.backgroundColor = '#999';
     }
     
     sendJSON(message);

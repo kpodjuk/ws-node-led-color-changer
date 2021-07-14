@@ -245,6 +245,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
     case WStype_TEXT:                     // if new text data is received
       Serial.printf("[%u] get Text: %s\n", num, payload);
 
+      // String payload_str = String((char*) payload);
 
       // process received JSON
       DeserializationError error = deserializeJson(jsonDoc, payload);
@@ -268,6 +269,13 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
       }
       else if(jsonDoc["type"] == "RAINBOW"){ // RAINBOW
             currentOperatingMode = RAINBOW;
+      } 
+      else if(0){ // Other operating modes go here
+        // currentOperatingMode = RAINBOW;
+
+      } 
+      else if(jsonDoc["type"] == "STATUS_UPDATE_NEEDED"){ // Client needs status update
+        sendStatus();
       }
 
       // After processing message -> check what to do 
@@ -278,6 +286,24 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
   }
 }
 
+
+void sendStatus(){
+  // send current status to websocket client here (mode, settings for that mode)
+  jsonDoc["type"] = "STATUS_UPDATE";
+  jsonDoc["message"] = "BLABLABALBLA";
+  String statusString;
+  serializeJson(jsonDoc, statusString);
+
+
+  // JsonArray data = doc.createNestedArray("data");
+  // data.add(48.756080);
+  // data.add(2.302038);
+  
+  // It's sent to every client connected, not the one who requested it
+  // no harm in that tho
+  webSocket.broadcastTXT(statusString);
+
+}
 
 
 String formatBytes(size_t bytes) { // convert sizes in bytes to KB and MB
@@ -359,36 +385,11 @@ void checkOperationMode(void){
     rainbow = false; // temporary
 
   } else if (currentOperatingMode == RAINBOW){
-    Serial.print("RAINBOW!\n");
+    // Serial.print("RAINBOW!\n");
     // rainbow function has to be executed in loop: rainbowWave(200, 10)
     // should write effect functions that don't require that
     rainbow = true; // activate rainbow mode
   }
-
-
-}
-
-
-void setSolidColor(int color){
-        
-
-          //  uint32_t rgb = (uint32_t) strtol((const char *) &payload[1], NULL, 16);   // decode rgb data
-        // int r = ((rgb >> 20) & 0x3FF);                     // 10 bits per color, so R: bits 20-29
-        // int g = ((rgb >> 10) & 0x3FF);                     // G: bits 10-19
-        // int b =          rgb & 0x3FF;                      // B: bits  0-9
-
-        // r = r/4;
-        // g = g/4;
-        // b = b/4;
-
-
-        // for(int i = 0; i<NUM_LEDS; i++){
-        // leds[i].r = r;                          // write it to the LED output pins
-        // leds[i].g = g;                          
-        // leds[i].b = b;                          
-        // }
-
-        // FastLED.show();
 
 
 }
@@ -403,3 +404,4 @@ void executeEveryLoop(){
   }
   
 }
+
