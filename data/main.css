@@ -102,3 +102,13 @@ input.enabled[type=range]::-webkit-slider-runnable-track {
 #settings{
     display: none;
 }
+
+
+#modeHeader{
+    padding-left: 50px;
+    padding-right: 50px;
+}
+
+#mode {
+    width:100%;
+}

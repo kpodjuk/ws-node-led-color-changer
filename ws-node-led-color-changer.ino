@@ -283,6 +283,7 @@ void sendStatus(){
   String statusString;
   serializeJson(jsonDoc, statusString);
 
+
   // JsonArray data = doc.createNestedArray("data");
   // data.add(48.756080);
   // data.add(2.302038);

@@ -46,8 +46,8 @@ function requestStatusReport(){
     sendJSON(message);
 }
 
-function processStatusReport(statusReport){ // process status sent from arduino and setup UI to reflect it
-    // statusReport - object with info
+function processStatusReport(m){ // process status sent from arduino and setup UI to reflect it
+    // m - object with info
 }
 
 
@@ -64,8 +64,7 @@ function checkConnection(){
             break;
         case 1:
             document.getElementById('connectionStatus').innerHTML = "Status: <b style='color: green'>POLACZONO</b>";
-            document.getElementById('settings').style.display = "inline";
-            console.log("CONNECTED");
+            document.getElementById('settings').style.display = "block";
             break;
         case 2:
             document.getElementById('connectionStatus').innerHTML = "Status: <b style='color: gray'>ZAMYKANIE</b>";
@@ -116,13 +115,13 @@ function switchModeDropdownHandler(){
 function switchMode(mode){
     switch(mode){
         case "ADALIGHT":
-            document.getElementById("settingsAdalight").style.display = "inline";
+            document.getElementById("settingsAdalight").style.display = "block";
             document.getElementById("settingsSolidColor").style.display = "none";
             document.getElementById("settingsEffects").style.display = "none";
             break;
         case "SOLID_COLOR":
             document.getElementById("settingsAdalight").style.display = "none";
-            document.getElementById("settingsSolidColor").style.display = "inline";
+            document.getElementById("settingsSolidColor").style.display = "block";
             document.getElementById("settingsEffects").style.display = "none";
             var message = {
                 type: "SOLID_COLOR",
