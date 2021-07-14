@@ -21,6 +21,7 @@ connection.onopen = function () {
 };
 connection.onerror = function (error) {
     console.log('WebSocket Error ', error);
+    checkConnection();
 };
 connection.onmessage = function (e) {  
     console.log('Server: ', e.data);
@@ -39,16 +40,16 @@ function checkConnection(){
 
     switch(connectionState){
         case 0: 
-            document.getElementById('connectionStatus').innerHTML = 'Status: LACZENIE';
+            document.getElementById('connectionStatus').innerHTML = "Status: <b style='color: gray'>LACZENIE</b>";
             break;
         case 1:
-            document.getElementById('connectionStatus').innerHTML = 'Status: POLACZONO';
+            document.getElementById('connectionStatus').innerHTML = "Status: <b style='color: green'>POLACZONO</b>";
             break;
         case 2:
-            document.getElementById('connectionStatus').innerHTML = 'Status: ZAMYKANIE';
+            document.getElementById('connectionStatus').innerHTML = "Status: <b style='color: gray'>ZAMYKANIE</b>";
             break;
         case 3:
-            document.getElementById('connectionStatus').innerHTML = 'Status: ROZLACZONO';
+            document.getElementById('connectionStatus').innerHTML = "Status: <b style='color: gray'>ROZLACZONO</b>";
             break;
     }
 

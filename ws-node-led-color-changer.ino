@@ -347,3 +347,6 @@ void rainbowWave(uint8_t thisSpeed, uint8_t deltaHue) {     // The fill_rainbow 
  fill_rainbow(leds, NUM_LEDS, thisHue, deltaHue);            // Use FastLED's fill_rainbow routine.
  
 } 
+
+
+
