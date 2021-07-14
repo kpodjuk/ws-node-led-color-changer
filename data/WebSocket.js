@@ -26,8 +26,6 @@ connection.onclose = function(){
 function sendJSON(message){
     // input : message object
 
-
-
     messageString = JSON.stringify(message);
     connection.send(messageString);
 }
@@ -38,9 +36,7 @@ function checkConnection(){
     // 1	OPEN	The connection is open and ready to communicate.
     // 2	CLOSING	The connection is in the process of closing.
     // 3	CLOSED	The connection is closed or couldn't be opened.
-
     connectionState = connection.readyState;
-
     switch(connectionState){
         case 0: 
             document.getElementById('connectionStatus').innerHTML = "Status: <b style='color: gray'>LACZENIE</b>";
@@ -55,8 +51,6 @@ function checkConnection(){
             document.getElementById('connectionStatus').innerHTML = "Status: <b style='color: gray'>ROZLACZONO</b>";
             break;
     }
-
-
 
 }
 
@@ -118,22 +112,34 @@ function switchMode(){
     var value = document.getElementById("mode").value;
 
     switch(value){
-        case "adalight":
+        case "ADALIGHT":
             document.getElementById("settingsAdalight").style.display = "inline";
             document.getElementById("settingsSolidColor").style.display = "none";
             document.getElementById("settingsEffects").style.display = "none";
             break;
-        case "solid":
+        case "SOLID_COLOR":
             document.getElementById("settingsAdalight").style.display = "none";
             document.getElementById("settingsSolidColor").style.display = "inline";
             document.getElementById("settingsEffects").style.display = "none";
+            var message = {
+                type: "SOLID_COLOR",
+                value: "NO_CHANGE"
+            }
+            sendJSON(message);
+
             break;
-        case "effects":
+        case "RAINBOW": //rainbow has no settings
             document.getElementById("settingsAdalight").style.display = "none";
             document.getElementById("settingsSolidColor").style.display = "none";
-            document.getElementById("settingsEffects").style.display = "inline";
+            document.getElementById("settingsEffects").style.display = "none";
+            var message = {
+                type: "RAINBOW"
+            }
             break;
     }
+
+
+    // send new mode to arduino
 
 
 }

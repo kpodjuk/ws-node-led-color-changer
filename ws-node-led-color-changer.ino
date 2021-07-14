@@ -255,7 +255,6 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
 
 
       // process received JSON
-
       DeserializationError error = deserializeJson(jsonDoc, payload);
 
       // Test if parsing succeeds.
@@ -265,25 +264,22 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
         return;  
       }
 
-
       // Fetch values.
       //
       // Most of the time, you can rely on the implicit casts.
       // In other case, you can do doc["time"].as<long>();
 
-
-      // Serial.printf("%s and %s", String(jsonDoc["type"]), (jsonDoc["value"]));
-
-      if(jsonDoc["type"] == "SOLID_COLOR"){ // SOLID _COLOR
-
-        currentOperatingMode = SOLID_COLOR;
-        solidColor = jsonDoc["value"];
-
-        // Serial.print("Received solidColor type message\n");
-        
-
-        // setSolidColor((int)jsonDoc["value"]);
+      if(jsonDoc["type"] == "SOLID_COLOR"){ // SOLID _COLOR operating mode
+        if(jsonDoc["value"] != "NO_CHANGE"){ //change color only when there's color value attached to message
+          currentOperatingMode = SOLID_COLOR;
+          solidColor = jsonDoc["value"];
+        }
       }
+      else if(jsonDoc["type"] == "RAINBOW"){ // RAINBOW
+            currentOperatingMode = RAINBOW;
+      }
+
+      
 
       // After receiving message -> check what to do 
       checkOperationMode();
