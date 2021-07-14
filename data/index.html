@@ -16,34 +16,35 @@
         <header>
             <h1 id='connectionStatus'>Status: <b style='color: gray'>LACZENIE</b></h1> <!-- ver 2 -->
         </header>
-        <header>
-            <h1>Wybierz tryb</h1> <!-- ver 2 -->
-        </header>
-            <table>
-                <tr>
-                    <td>Tryb:</td>
-                    <td><select name="mode" id="mode">
-                        <option value="ADALIGHT">Adalight (odczyt przez serial)</option>
-                        <option value="SOLID_COLOR">Jednolity kolor</option>
-                        <option value="RAINBOW">Tecza</option>
-                        <option value="effects">Wiecej...</option>
-                      </select>
-                    </td>
-                </tr>
-                <tr id="settingsAdalight" class="operatingModeSettings">
-                    <td>TUTAJ USTAWIENNIA PRZY settingsAdalight</td>
-                </tr>
-                <tr id="settingsSolidColor" class="operatingModeSettings">
-                    <td>Kolor: <input type="color" id="solidColor"></td>
-                </tr>
-                <tr id="settingsEffects" class="operatingModeSettings">
-                    <td>
-                        <p style="margin:8px 0px"><button id="rainbow" class="button" style="background-color:#999" onclick="sendRainbowEffect();">Rainbow</button></p>
-                    </td>
-                </tr>
+        <div id="settings">
+            <header>
+                <h1>Wybierz tryb</h1> <!-- ver 2 -->
+            </header>
+                <table>
+                    <tr>
+                        <td>Tryb:</td>
+                        <td><select name="mode" id="mode">
+                            <option value="ADALIGHT">Adalight (odczyt przez serial)</option>
+                            <option value="SOLID_COLOR">Jednolity kolor</option>
+                            <option value="RAINBOW">Tecza</option>
+                            <option value="effects">Wiecej...</option>
+                        </select>
+                        </td>
+                    </tr>
+                    <tr id="settingsAdalight" class="operatingModeSettings">
+                        <td>TUTAJ USTAWIENNIA PRZY settingsAdalight</td>
+                    </tr>
+                    <tr id="settingsSolidColor" class="operatingModeSettings">
+                        <td>Kolor: <input type="color" id="solidColor"></td>
+                    </tr>
+                    <tr id="settingsEffects" class="operatingModeSettings">
+                        <td>
+                            <p style="margin:8px 0px"><button id="rainbow" class="button" style="background-color:#999" onclick="sendRainbowEffect();">Rainbow</button></p>
+                        </td>
+                    </tr>
 
-            </table>
-
+                </table>
+        </div>
     </center>
 </body>
 <script>

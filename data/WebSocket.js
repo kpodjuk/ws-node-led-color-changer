@@ -60,15 +60,20 @@ function checkConnection(){
     switch(connection.readyState){
         case 0: 
             document.getElementById('connectionStatus').innerHTML = "Status: <b style='color: gray'>LACZENIE</b>";
+            document.getElementById('settings').style.display = "none";
             break;
         case 1:
             document.getElementById('connectionStatus').innerHTML = "Status: <b style='color: green'>POLACZONO</b>";
+            document.getElementById('settings').style.display = "inline";
+            console.log("CONNECTED");
             break;
         case 2:
             document.getElementById('connectionStatus').innerHTML = "Status: <b style='color: gray'>ZAMYKANIE</b>";
+            document.getElementById('settings').style.display = "none";
             break;
         case 3:
             document.getElementById('connectionStatus').innerHTML = "Status: <b style='color: gray'>ROZLACZONO</b>";
+            document.getElementById('settings').style.display = "none";
             break;
     }
 

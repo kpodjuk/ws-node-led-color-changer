@@ -98,3 +98,7 @@ input.enabled[type=range]::-webkit-slider-runnable-track {
 .operatingModeSettings {
     display: none; 
 }
+
+#settings{
+    display: none;
+}

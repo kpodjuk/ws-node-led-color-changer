@@ -169,7 +169,7 @@ void startMDNS() { // Start the mDNS responder
 void startServer() { // Start a HTTP server with a file read handler and an upload handler
   server.on("/edit.html",  HTTP_POST, []() {  // If a POST request is sent to the /edit.html address,
     server.send(200, "text/plain", ""); 
-  }, handleFileUpload);                       // go to 'handleFileUpload'
+  });
 
   server.onNotFound(handleNotFound);          // if someone requests any other file or page, go to function 'handleNotFound'
                                               // and check if the file exists
@@ -200,35 +200,6 @@ bool handleFileRead(String path) { // send the right file to the client (if it e
   }
   Serial.println(String("\tFile Not Found: ") + path);   // If the file doesn't exist, return false
   return false;
-}
-
-void handleFileUpload(){ // upload a new file to the SPIFFS
-  HTTPUpload& upload = server.upload();
-  String path;
-  if(upload.status == UPLOAD_FILE_START){
-    path = upload.filename;
-    if(!path.startsWith("/")) path = "/"+path;
-    if(!path.endsWith(".gz")) {                          // The file server always prefers a compressed version of a file 
-      String pathWithGz = path+".gz";                    // So if an uploaded file is not compressed, the existing compressed
-      if(SPIFFS.exists(pathWithGz))                      // version of that file must be deleted (if it exists)
-         SPIFFS.remove(pathWithGz);
-    }
-    Serial.print("handleFileUpload Name: "); Serial.println(path);
-    fsUploadFile = SPIFFS.open(path, "w");            // Open the file for writing in SPIFFS (create if it doesn't exist)
-    path = String();
-  } else if(upload.status == UPLOAD_FILE_WRITE){
-    if(fsUploadFile)
-      fsUploadFile.write(upload.buf, upload.currentSize); // Write the received bytes to the file
-  } else if(upload.status == UPLOAD_FILE_END){
-    if(fsUploadFile) {                                    // If the file was successfully created
-      fsUploadFile.close();                               // Close the file again
-      Serial.print("handleFileUpload Size: "); Serial.println(upload.totalSize);
-      server.sendHeader("Location","/success.html");      // Redirect the client to the success page
-      server.send(303);
-    } else {
-      server.send(500, "text/plain", "500: couldn't create file");
-    }
-  }
 }
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght) { // When a WebSocket message is received
@@ -286,26 +257,6 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
   }
 }
 
-
-void sendStatus(){
-  // send current status to websocket client here (mode, settings for that mode)
-  jsonDoc["type"] = "STATUS_UPDATE";
-  jsonDoc["message"] = "BLABLABALBLA";
-  String statusString;
-  serializeJson(jsonDoc, statusString);
-
-
-  // JsonArray data = doc.createNestedArray("data");
-  // data.add(48.756080);
-  // data.add(2.302038);
-  
-  // It's sent to every client connected, not the one who requested it
-  // no harm in that tho
-  webSocket.broadcastTXT(statusString);
-
-}
-
-
 String formatBytes(size_t bytes) { // convert sizes in bytes to KB and MB
   if (bytes < 1024) {
     return String(bytes) + "B";
@@ -324,6 +275,24 @@ String getContentType(String filename) { // determine the filetype of a given fi
   else if (filename.endsWith(".gz")) return "application/x-gzip";
   return "text/plain";
 }
+
+void sendStatus(){
+  // send current status to websocket client here (mode, settings for that mode)
+  jsonDoc["type"] = "STATUS_UPDATE";
+  jsonDoc["message"] = "BLABLABALBLA";
+  String statusString;
+  serializeJson(jsonDoc, statusString);
+
+  // JsonArray data = doc.createNestedArray("data");
+  // data.add(48.756080);
+  // data.add(2.302038);
+
+  // It's sent to every client connected, not the one who requested it
+  // no harm in that tho
+  webSocket.broadcastTXT(statusString);
+
+}
+
 
 void setHue(int hue) { // Set the RGB LED to a given hue (color) (0° = Red, 120° = Green, 240° = Blue)
   hue %= 360;                   // hue is an angle between 0 and 359°
@@ -372,8 +341,6 @@ void rainbowWave(uint8_t thisSpeed, uint8_t deltaHue) {     // The fill_rainbow 
 
 
 void checkOperationMode(void){
-
-
 
   if(currentOperatingMode == SOLID_COLOR){ // set whole strip to one color
     // set color here, solidColor global var contains color info
