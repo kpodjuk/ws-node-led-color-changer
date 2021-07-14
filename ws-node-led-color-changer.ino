@@ -13,7 +13,7 @@ void rainbowWave(uint8_t, uint8_t);
 void executeEveryLoop(void);
 
 // ************ Global vars ************
-bool rainbow = false;             // The rainbow effect is turned off on startup
+bool rainbow = false; // The rainbow effect is turned off on startup
 unsigned long start, end = 0;
 unsigned long prevMillis = millis();
 int hue = 0;

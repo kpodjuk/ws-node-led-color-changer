@@ -1,4 +1,3 @@
-
 var connectionCheckInterval = window.setInterval(function(){ 
     checkConnection();
   }, 2000);
@@ -36,8 +35,7 @@ function checkConnection(){
     // 1	OPEN	The connection is open and ready to communicate.
     // 2	CLOSING	The connection is in the process of closing.
     // 3	CLOSED	The connection is closed or couldn't be opened.
-    connectionState = connection.readyState;
-    switch(connectionState){
+    switch(connection.readyState){
         case 0: 
             document.getElementById('connectionStatus').innerHTML = "Status: <b style='color: gray'>LACZENIE</b>";
             break;
@@ -89,10 +87,13 @@ function sendRainbowEffect(){
 }
 
 
-function switchMode(){
+function switchModeDropdownHandler(){
     var value = document.getElementById("mode").value;
+    switchMode(value);
+}
 
-    switch(value){
+function switchMode(mode){
+    switch(mode){
         case "ADALIGHT":
             document.getElementById("settingsAdalight").style.display = "inline";
             document.getElementById("settingsSolidColor").style.display = "none";
@@ -119,11 +120,5 @@ function switchMode(){
             break;
     }
 
-
-
-
-
 }
-
-
 

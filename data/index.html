@@ -22,7 +22,7 @@
             <table>
                 <tr>
                     <td>Tryb:</td>
-                    <td><select name="mode" id="mode" oninput="switchMode();">
+                    <td><select name="mode" id="mode">
                         <option value="ADALIGHT">Adalight (odczyt przez serial)</option>
                         <option value="SOLID_COLOR">Jednolity kolor</option>
                         <option value="RAINBOW">Tecza</option>
@@ -30,13 +30,13 @@
                       </select>
                     </td>
                 </tr>
-                <tr style="display: none;" id="settingsAdalight">
+                <tr id="settingsAdalight" class="operatingModeSettings">
                     <td>TUTAJ USTAWIENNIA PRZY settingsAdalight</td>
                 </tr>
-                <tr style="display: none;" id="settingsSolidColor">
+                <tr id="settingsSolidColor" class="operatingModeSettings">
                     <td>Kolor: <input type="color" id="solidColor"></td>
                 </tr>
-                <tr style="display: none;" id="settingsEffects">
+                <tr id="settingsEffects" class="operatingModeSettings">
                     <td>
                         <p style="margin:8px 0px"><button id="rainbow" class="button" style="background-color:#999" onclick="sendRainbowEffect();">Rainbow</button></p>
                     </td>
@@ -49,6 +49,9 @@
 <script>
     // ADD EVENT LISTENERS
 
+    // mode dropdown change
+    document.getElementById('mode').addEventListener("input", switchModeDropdownHandler);
+    
     // Solid color change
     document.getElementById('solidColor').addEventListener("input", sendSolidColor);
 </script>
