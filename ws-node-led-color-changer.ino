@@ -8,6 +8,10 @@
 #include  "FastLED.h"
 #include "ArduinoJson.h"
 
+// For enum to string conversion (used when sending status to client)
+#define str(x) #x
+#define xstr(x) str(x)
+
 // ************ Function definitions ************
 void rainbowWave(uint8_t, uint8_t);
 void executeEveryLoop(void);
@@ -22,10 +26,11 @@ int hue = 0;
 uint32_t solidColor = 0xFF0000; // default: red
 
 enum OPERATING_MODE {
+  AMBILIGHT,
   SOLID_COLOR,
   RAINBOW,
   DIFFERENT_EFFECTS,
-  AMBILIGHT
+
 } currentOperatingMode;
 
 #define NUM_LEDS 59
@@ -234,12 +239,12 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
 
       if(jsonDoc["type"] == "SOLID_COLOR"){ // SOLID_COLOR
           currentOperatingMode = SOLID_COLOR;
-        if(jsonDoc["color"] != "NO_CHANGE"){ //change color only when there's color value attached to message
           solidColor = jsonDoc["color"];
-        }
+          checkOperationMode();
       }
       else if(jsonDoc["type"] == "RAINBOW"){ // RAINBOW
-            currentOperatingMode = RAINBOW;
+          currentOperatingMode = RAINBOW;
+          checkOperationMode();
       } 
       else if(0){ // Other operating modes go here
         // currentOperatingMode = RAINBOW;
@@ -249,8 +254,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
         sendStatus();
       }
 
-      // After processing message -> check what to do 
-      checkOperationMode();
+
 
 
       break;
@@ -279,7 +283,12 @@ String getContentType(String filename) { // determine the filetype of a given fi
 void sendStatus(){
   // send current status to websocket client here (mode, settings for that mode)
   jsonDoc["type"] = "STATUS_UPDATE";
-  jsonDoc["message"] = "BLABLABALBLA";
+  jsonDoc["OPERATING_MODE"] = currentOperatingMode; 
+
+  if(currentOperatingMode == SOLID_COLOR){ // attach info about choosen setting if needed
+  jsonDoc["solidColor"] = solidColor;
+  }
+
   String statusString;
   serializeJson(jsonDoc, statusString);
 
