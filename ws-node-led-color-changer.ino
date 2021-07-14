@@ -8,10 +8,6 @@
 #include  "FastLED.h"
 #include "ArduinoJson.h"
 
-// For enum to string conversion (used when sending status to client)
-#define str(x) #x
-#define xstr(x) str(x)
-
 // ************ Function definitions ************
 void rainbowWave(uint8_t, uint8_t);
 void executeEveryLoop(void);

@@ -56,7 +56,12 @@ function processStatusReport(m) { // process status sent from arduino and setup 
             break;
         case 1:
             switchMode("SOLID_COLOR");
-            document.getElementById('solidColor').value = "#" + m["solidColor"].toString(16);
+            // process color from C format (normal number -> #FFFFFF style string)
+            var colorString = m["solidColor"].toString(16); 
+            colorString = colorString.padStart(6, 0);
+            colorString = "#" + colorString;
+            // console.log("Processed color: "+ colorString);
+            document.getElementById('solidColor').value = colorString;
             break;
         case 2:
             // RAINBOW
@@ -140,13 +145,14 @@ function switchMode(mode) {
             document.getElementById("settingsAdalight").style.display = "none";
             document.getElementById("settingsSolidColor").style.display = "block";
             document.getElementById("settingsEffects").style.display = "none";
-            document.getElementById('solidColor').value = "#000000"; //reset value when entering this mode
+            // document.getElementById('solidColor').value = "#000000"; //reset value when entering this mode
 
-            var message = { // send black as default 
-                type: "SOLID_COLOR",
-                color: 0
-            }
-            sendJSON(message);
+            // var message = { // send black as default 
+            //     type: "SOLID_COLOR",
+            //     color: 0
+            // }
+            // sendJSON(message);
+
             break;
         case "RAINBOW": //rainbow has no settings
             document.getElementById("settingsAdalight").style.display = "none";
