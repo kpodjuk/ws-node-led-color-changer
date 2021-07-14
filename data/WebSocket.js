@@ -1,9 +1,21 @@
+// message object
+var message = 
+{
+    type: "solid",
+    value: "#FFFFFF"
+}
 
+messageJson = JSON.stringify(message);
+
+var connectionCheckInterval = window.setInterval(function(){
+    checkConnection();
+  }, 2000);
 
 
 
 var rainbowEnable = false;
 var connection = new WebSocket('ws://'+location.hostname+':81/', ['arduino']);
+
 connection.onopen = function () {
     connection.send('Connect ' + new Date());
 };
@@ -16,6 +28,34 @@ connection.onmessage = function (e) {
 connection.onclose = function(){
     console.log('WebSocket connection closed');
 };
+
+function checkConnection(){
+    // 0	CONNECTING	Socket has been created. The connection is not yet open.
+    // 1	OPEN	The connection is open and ready to communicate.
+    // 2	CLOSING	The connection is in the process of closing.
+    // 3	CLOSED	The connection is closed or couldn't be opened.
+
+    connectionState = connection.readyState;
+
+    switch(connectionState){
+        case 0: 
+            document.getElementById('connectionStatus').innerHTML = 'Status: LACZENIE';
+            break;
+        case 1:
+            document.getElementById('connectionStatus').innerHTML = 'Status: POLACZONO';
+            break;
+        case 2:
+            document.getElementById('connectionStatus').innerHTML = 'Status: ZAMYKANIE';
+            break;
+        case 3:
+            document.getElementById('connectionStatus').innerHTML = 'Status: ROZLACZONO';
+            break;
+    }
+
+
+
+}
+
 
 function sendRGB() {
     var color = document.getElementById('solidColor').value;
@@ -45,21 +85,11 @@ function rainbowEffect(){
     if(rainbowEnable){
         connection.send("R");
         document.getElementById('rainbow').style.backgroundColor = '#00878F';
-        document.getElementById('r').className = 'disabled';
-        document.getElementById('g').className = 'disabled';
-        document.getElementById('b').className = 'disabled';
-        document.getElementById('r').disabled = true;
-        document.getElementById('g').disabled = true;
-        document.getElementById('b').disabled = true;
+
     } else {
         connection.send("N");
         document.getElementById('rainbow').style.backgroundColor = '#999';
-        document.getElementById('r').className = 'enabled';
-        document.getElementById('g').className = 'enabled';
-        document.getElementById('b').className = 'enabled';
-        document.getElementById('r').disabled = false;
-        document.getElementById('g').disabled = false;
-        document.getElementById('b').disabled = false;
+
         sendRGB();
     }  
 }

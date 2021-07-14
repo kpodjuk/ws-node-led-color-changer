@@ -6,7 +6,7 @@
 #include <FS.h>
 #include <WebSocketsServer.h>
 #include  "FastLED.h"
-
+#include "ArduinoJson.h"
 
 #define NUM_LEDS 59
 #define DATA_PIN 14 //D5 on board
@@ -250,6 +250,11 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
         int r = ((rgb >> 20) & 0x3FF);                     // 10 bits per color, so R: bits 20-29
         int g = ((rgb >> 10) & 0x3FF);                     // G: bits 10-19
         int b =          rgb & 0x3FF;                      // B: bits  0-9
+
+        r = r/4;
+        g = g/4;
+        b = b/4;
+
 
         for(int i = 0; i<NUM_LEDS; i++){
         leds[i].r = r;                          // write it to the LED output pins
