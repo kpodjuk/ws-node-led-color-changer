@@ -64,47 +64,28 @@ function sendSolidColor() {
     var message = 
     {
         type: "SOLID_COLOR",
-        value: colorNumber
+        color: colorNumber
     }
     sendJSON(message);
 
-    // var r = (colorNumber & 0xFF0000) >> 16;
-    // var g = (colorNumber & 0x00FF00) >> 8; 
-    // var b = (colorNumber & 0x0000FF);
-
-    // console.log("R:"+r+"G:"+g+"B:"+b);
-
-
-    // // weird format accepted by C code
-    // var rgb = r << 20 | g << 10 | b;
-    // var rgbstr = '#'+ rgb.toString(16);    
-    // console.log('RGB: ' + rgbstr); 
-    // connection.send(rgbstr);
-
-
 }
 
-function rainbowEffect(){
+function sendRainbowEffect(){
     rainbowEnable = ! rainbowEnable;
-
 
     var message = 
     {
-        type: "effect",
+        type: "RAINBOW",
         value: "rainbow"
     }
 
     if(rainbowEnable){
-        connection.send("R");
-        // sendJSON(message);
         document.getElementById('rainbow').style.backgroundColor = '#00878F';
-
     } else {
-        connection.send("N");
         document.getElementById('rainbow').style.backgroundColor = '#999';
-
-        // sendRGB();
-    }  
+    }
+    
+    sendJSON(message);
 }
 
 
@@ -123,10 +104,9 @@ function switchMode(){
             document.getElementById("settingsEffects").style.display = "none";
             var message = {
                 type: "SOLID_COLOR",
-                value: "NO_CHANGE"
+                color: "NO_CHANGE"
             }
-            sendJSON(message);
-
+            sendJSON(message); 
             break;
         case "RAINBOW": //rainbow has no settings
             document.getElementById("settingsAdalight").style.display = "none";
@@ -135,11 +115,12 @@ function switchMode(){
             var message = {
                 type: "RAINBOW"
             }
+            sendJSON(message); 
             break;
     }
 
 
-    // send new mode to arduino
+
 
 
 }

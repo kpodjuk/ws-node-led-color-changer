@@ -8,14 +8,18 @@
 #include  "FastLED.h"
 #include "ArduinoJson.h"
 
-#define NUM_LEDS 59
-#define DATA_PIN 14 //D5 on board
-
+// ************ Function definitions ************
 void rainbowWave(uint8_t, uint8_t);
+void executeEveryLoop(void);
 
+// ************ Global vars ************
+bool rainbow = false;             // The rainbow effect is turned off on startup
+unsigned long start, end = 0;
+unsigned long prevMillis = millis();
+int hue = 0;
 
-// Global vars to pass values from json message
-uint32_t solidColor = 0x0000FF; // default: blue
+// solid color from json message
+uint32_t solidColor = 0xFF0000; // default: red
 
 enum OPERATING_MODE {
   SOLID_COLOR,
@@ -24,18 +28,19 @@ enum OPERATING_MODE {
   AMBILIGHT
 } currentOperatingMode;
 
-
-
-CRGB leds[NUM_LEDS];
+#define NUM_LEDS 59
+#define DATA_PIN 14 //D5 on board
+#define JSON_MAXLENGTH 200
 
 ESP8266WiFiMulti wifiMulti;       // Create an instance of the ESP8266WiFiMulti class, called 'wifiMulti'
+
+StaticJsonDocument<JSON_MAXLENGTH> jsonDoc;    // JSON document received with websocket
 
 ESP8266WebServer server(80);       // Create a webserver object that listens for HTTP request on port 80
 WebSocketsServer webSocket(81);    // create a websocket server on port 81
 
 File fsUploadFile;                 // a File variable to temporarily store the received file
 
-StaticJsonDocument<200> jsonDoc;    // JSON document received with websocket
 
 const char *ssid = "NodeMCU1"; // The name of the Wi-Fi network that will be created
 const char *password = "";   // The password required to connect to it, leave blank for an open network
@@ -43,15 +48,12 @@ const char *password = "";   // The password required to connect to it, leave bl
 const char *OTAName = "ESP8266";           // A name and a password for the OTA service
 const char *OTAPassword = "esp8266";
 
-
-
 const char* mdnsName = "esp8266"; // Domain name for the mDNS responder
 
-
-
+CRGB leds[NUM_LEDS];
 
 void setup() {
-  FastLED.addLeds<WS2813, DATA_PIN, GRB>(leds, NUM_LEDS); 
+  FastLED.addLeds<WS2813, DATA_PIN, GRB>(leds, NUM_LEDS); // Add led strip
 
   Serial.begin(115200);        // Start the Serial communication to send messages to the computer
   delay(10);
@@ -71,25 +73,15 @@ void setup() {
   
 }
 
-
-bool rainbow = false;             // The rainbow effect is turned off on startup
-unsigned long start, end = 0;
-unsigned long prevMillis = millis();
-int hue = 0;
-
 void loop() {
   webSocket.loop();                           // constantly check for websocket events
   server.handleClient();                      // run the server
   ArduinoOTA.handle();                        // listen for OTA events
 
-  // checkOperationMode(); // check if need to apply effects etc
-
-
-
-
-  }
-
-
+  // not a perfect solution but:
+  // functions that have to be executed every loop will be executed here (rainbow for example)
+  executeEveryLoop();
+}
 
 
 void startWiFi() { // Start a Wi-Fi access point, and try to connect to some given access points. Then wait for either an AP or STA connection
@@ -98,9 +90,11 @@ void startWiFi() { // Start a Wi-Fi access point, and try to connect to some giv
   Serial.print(ssid);
   Serial.println("\" started\r\n");
 
+
+  // will it connect to multiple networks or only one? 
   wifiMulti.addAP("Orange_Swiatlowod_Gora", "mlekogrzybowe");   // add Wi-Fi networks you want to connect to
-  // wifiMulti.addAP("ssid_from_AP_2", "your_password_for_AP_2");
-  // wifiMulti.addAP("ssid_from_AP_3", "your_password_for_AP_3");
+  // wifiMulti.addAP("Orange_Swiatlowod_E8A0", "mlekogrzybowe);
+
 
   Serial.println("Connecting");
   while (wifiMulti.run() != WL_CONNECTED && WiFi.softAPgetStationNum() < 1) {  // Wait for the Wi-Fi to connect
@@ -125,9 +119,7 @@ void startOTA() { // Start the OTA service
 
   ArduinoOTA.onStart([]() {
     Serial.println("Start");
-    // digitalWrite(LED_RED, 0);    // turn off the LEDs
-    // digitalWrite(LED_GREEN, 0);
-    // digitalWrite(LED_BLUE, 0);
+
   });
   ArduinoOTA.onEnd([]() {
     Serial.println("\r\nEnd");
@@ -265,26 +257,21 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
       }
 
       // Fetch values.
-      //
       // Most of the time, you can rely on the implicit casts.
       // In other case, you can do doc["time"].as<long>();
 
-      if(jsonDoc["type"] == "SOLID_COLOR"){ // SOLID _COLOR operating mode
-        if(jsonDoc["value"] != "NO_CHANGE"){ //change color only when there's color value attached to message
+      if(jsonDoc["type"] == "SOLID_COLOR"){ // SOLID_COLOR
           currentOperatingMode = SOLID_COLOR;
-          solidColor = jsonDoc["value"];
+        if(jsonDoc["color"] != "NO_CHANGE"){ //change color only when there's color value attached to message
+          solidColor = jsonDoc["color"];
         }
       }
       else if(jsonDoc["type"] == "RAINBOW"){ // RAINBOW
             currentOperatingMode = RAINBOW;
       }
 
-      
-
-      // After receiving message -> check what to do 
+      // After processing message -> check what to do 
       checkOperationMode();
-
-
 
 
       break;
@@ -359,28 +346,26 @@ void rainbowWave(uint8_t thisSpeed, uint8_t deltaHue) {     // The fill_rainbow 
 
 
 void checkOperationMode(void){
+
+
+
   if(currentOperatingMode == SOLID_COLOR){ // set whole strip to one color
     // set color here, solidColor global var contains color info
         
-        for(int i = 0; i<NUM_LEDS; i++){
-        leds[i] = solidColor;                          // write it to the LED output pins                    
-        }
-        FastLED.show();
+    for(int i = 0; i<NUM_LEDS; i++){
+      leds[i] = solidColor; // write it to the LED output pins                    
+    }
+    FastLED.show();
+    rainbow = false; // temporary
 
-
+  } else if (currentOperatingMode == RAINBOW){
+    Serial.print("RAINBOW!\n");
+    // rainbow function has to be executed in loop: rainbowWave(200, 10)
+    // should write effect functions that don't require that
+    rainbow = true; // activate rainbow mode
   }
 
-  //rainbow
-  if(0) {                               // if the rainbow effect is turned on
-    // if(millis() > prevMillis + 32) {          
-    //   if(++hue == 360)                        // Cycle through the color wheel (increment by one degree every 32 ms)
-    //     hue = 0;
-    //   setHue(hue);                            // Set the RGB LED to the right color
-    //   prevMillis = millis();
-    // }
-      rainbowWave(200, 10);
-      FastLED.show();
-  }
+
 }
 
 
@@ -406,4 +391,15 @@ void setSolidColor(int color){
         // FastLED.show();
 
 
+}
+
+
+void executeEveryLoop(){
+  
+  // rainbow
+  if(rainbow){
+    rainbowWave(200, 10);
+    FastLED.show();
+  }
+  
 }
