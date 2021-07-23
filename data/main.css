@@ -112,3 +112,7 @@ input.enabled[type=range]::-webkit-slider-runnable-track {
 #mode {
     width:100%;
 }
+
+select {
+    padding: 7px;
+}

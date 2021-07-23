@@ -17,17 +17,21 @@
             <h1 id='connectionStatus'>Status: <b style='color: gray'>LACZENIE</b></h1> <!-- ver 2 -->
         </header>
         <div id="settings">
-
                 <table>
-                    <tr><td>            
-                        <header id="modeHeader">
-                        <h1>Wybierz tryb</h1>
-                    </header></td></tr>
                     <tr>
-                        <td><select name="mode" id="mode">
-                            <option value="ADALIGHT">Adalight (odczyt przez serial)</option>
+                    <td>            
+                        <header id="modeHeader">
+                            <h1>Wybierz tryb</h1>
+                        </header>
+                    </td>
+                    </tr>
+                    <tr>
+                        <td>
+                        <select name="mode" id="mode">
                             <option value="SOLID_COLOR">Jednolity kolor</option>
+                            <option value="ADALIGHT">Adalight (odczyt przez serial)</option>
                             <option value="RAINBOW">Tecza</option>
+                            <option value="BLINK">Blink</option>
                             <option value="effects">Wiecej...</option>
                         </select>
                         </td>

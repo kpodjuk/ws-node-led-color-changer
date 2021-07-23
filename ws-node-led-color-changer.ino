@@ -22,10 +22,11 @@ int hue = 0;
 uint32_t solidColor = 0xFF0000; // default: red
 
 enum OPERATING_MODE {
-  AMBILIGHT,
+  ADALIGHT,
   SOLID_COLOR,
   RAINBOW,
   DIFFERENT_EFFECTS,
+  BLINK
 
 } currentOperatingMode;
 
@@ -242,8 +243,9 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
           currentOperatingMode = RAINBOW;
           checkOperationMode();
       } 
-      else if(0){ // Other operating modes go here
-        // currentOperatingMode = RAINBOW;
+      else if(jsonDoc["type"] == "BLINK"){ // Other operating modes go here
+          currentOperatingMode = BLINK;
+          checkOperationMode();
 
       } 
       else if(jsonDoc["type"] == "STATUS_UPDATE_NEEDED"){ // Client needs status update
@@ -355,13 +357,15 @@ void checkOperationMode(void){
       leds[i] = solidColor; // write it to the LED output pins                    
     }
     FastLED.show();
-    rainbow = false; // temporary
+
 
   } else if (currentOperatingMode == RAINBOW){
     // Serial.print("RAINBOW!\n");
     // rainbow function has to be executed in loop: rainbowWave(200, 10)
     // should write effect functions that don't require that
-    rainbow = true; // activate rainbow mode
+
+  } else if (currentOperatingMode == BLINK){
+
   }
 
 
@@ -371,10 +375,31 @@ void checkOperationMode(void){
 void executeEveryLoop(){
   
   // rainbow
-  if(rainbow){
+  if(currentOperatingMode == RAINBOW){
     rainbowWave(200, 10);
     FastLED.show();
+  } else if (currentOperatingMode == BLINK){
+    doBlinkStep();
   }
   
+}
+
+void doBlinkStep(){
+  static bool is_red = false;
+  int actTime = millis();
+  static int remTime;
+  const int period = 500;
+  if (actTime - remTime >= period){
+    remTime = actTime;
+    if(!is_red) {
+        is_red = true;
+        fill_solid(leds, NUM_LEDS, CRGB::Red);
+        FastLED.show();
+    } else {
+        is_red = false;
+        fill_solid(leds, NUM_LEDS, CRGB::Black);
+        FastLED.show();
+    }
+  }
 }
 

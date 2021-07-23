@@ -9,7 +9,7 @@ var connection = new WebSocket('ws://' + location.hostname + ':81/', ['arduino']
 
 connection.onopen = function () {
     requestStatusReport(); // request report to fill UI with current data
-    connection.send('Connect ' + new Date());
+    // connection.send('Connect ' + new Date());
 };
 connection.onerror = function (error) {
     console.log('WebSocket Error ', error);
@@ -66,6 +66,9 @@ function processStatusReport(m) { // process status sent from arduino and setup 
         case 2:
             // RAINBOW
             switchMode("RAINBOW");
+            break;
+        case 4: //BLINK
+            switchMode("BLINK");
             break;
     }
 }
@@ -160,6 +163,15 @@ function switchMode(mode) {
             document.getElementById("settingsEffects").style.display = "none";
             var message = {
                 type: "RAINBOW"
+            }
+            sendJSON(message);
+            break;
+        case "BLINK":
+            document.getElementById("settingsAdalight").style.display = "none";
+            document.getElementById("settingsSolidColor").style.display = "none";
+            document.getElementById("settingsEffects").style.display = "none";
+            var message = {
+                type: "BLINK"
             }
             sendJSON(message);
             break;
